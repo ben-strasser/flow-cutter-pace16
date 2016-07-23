@@ -5,7 +5,7 @@ If you are running a Unix-like system, then getting started is very simple. Just
 
 ```bash
 git clone https://github.com/ben-strasser/flow-cutter-pace16.git
-cd flow_cutter_pace16
+cd flow-cutter-pace16
 ./build.sh
 ```
 
