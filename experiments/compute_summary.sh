@@ -8,4 +8,4 @@
 		echo -n ,
 		grep -E "^s td" $G | sed -E "s/^s td ([0-9]+) ([0-9]+) ([0-9]+)$/\2/"
 	done
-) > output_summary.csv
+) > summary.csv
