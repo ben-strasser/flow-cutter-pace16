@@ -73,7 +73,7 @@ void signal_handler(int)
 	#pragma omp critical
 	#endif
 	{
-		if(tail.image_count() != 0 && order.image_count() != 0)
+		if(tail.image_count() != 0 && best_order.image_count() != 0)
 			print_tree_decompostion("-", tail, head, best_order);
 	}
 	exit(0);
