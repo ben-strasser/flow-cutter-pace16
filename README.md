@@ -4,7 +4,7 @@ This repository contains the FlowCutter code submitted to the [PACE 2016](https:
 If you are running a Unix-like system, then getting started is very simple. Just clone the repository and build the programs, as follows:
 
 ```bash
-git clone flow_cutter_pace16
+git clone https://github.com/ben-strasser/flow-cutter-pace16.git
 cd flow_cutter_pace16
 ./build.sh
 ```
@@ -28,6 +28,8 @@ The executables run until either a SIGINT or SIGTERM signal is sent. Once this s
 The format specification of the input graph and output decompositions follow those of the [PACE 2016](https://pacechallenge.wordpress.com/track-a-treewidth/) challenge. 
 
 The parallization is done using OpenMP. You can therefore control the number of threads spawned by setting the environment variable `OMP_NUM_THREADS` and use any of the other [OpenMP environment variables](https://gcc.gnu.org/onlinedocs/libgomp/Environment-Variables.html) used in the GCC's OpenMP implementation.
+
+The experiments subdirectory contains tree decompositions computed during our testing.
 
 ## Publications
 
