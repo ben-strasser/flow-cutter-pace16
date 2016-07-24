@@ -10,7 +10,7 @@
 #include "id_multi_func.h"
 using namespace std;
 
-void print_tree_decompostion(const std::string&file_name, ArrayIDIDFunc tail, ArrayIDIDFunc head, const ArrayIDIDFunc&order){
+void print_tree_decompostion(std::ostream&out, ArrayIDIDFunc tail, ArrayIDIDFunc head, const ArrayIDIDFunc&order){
 	const int node_count = tail.image_count();
 	assert(node_count > 1);
 
@@ -106,88 +106,82 @@ void print_tree_decompostion(const std::string&file_name, ArrayIDIDFunc tail, Ar
 		if((int)b.size() > maximum_bag_size)
 			maximum_bag_size = b.size();
 
-
-	save_text_file(
-		file_name, 
-		[&](std::ostream&out){
-			out << "s td "<< nodes_in_bag.size() << ' ' << maximum_bag_size << ' ' << node_count << '\n';
-			for(int i=0; i<bag_count; ++i){
-				out << "b "<<(i+1);
-				for(auto x:nodes_in_bag[i])
-					out << ' ' << (order(x)+1);
-				out << '\n';
-				
-			}
-
-			{
-				auto output_backbone_edge = [&](int b, int p){
-					out << (b+1) << ' ' << (p+1) << '\n';
-				};
-
-				std::vector<int>tail, head, weight;
-
-				for(int b=0; b<bag_count; ++b){
-					vector<int>neighbor_bags;
-					for(auto x:nodes_in_bag[b]){
-						vector<int>tmp;
-						std::set_union(
-							bags_of_node[x].begin(), bags_of_node[x].end(),
-							neighbor_bags.begin(), neighbor_bags.end(),
-							std::back_inserter(tmp)
-						);
-						neighbor_bags.swap(tmp);
-					}
-					for(auto p:neighbor_bags){
-						if(p != b){
-							tail.push_back(b);
-							head.push_back(p);
-							weight.push_back(compute_intersection_size(nodes_in_bag[b], nodes_in_bag[p]));
-						}
-					}
-				}
-
-				int arc_count = tail.size();
-
-				auto out_arc = invert_id_id_func(
-					id_id_func(
-						arc_count, bag_count, 
-						[&](unsigned a){return tail[a];}
-					)
-				);
-
-				BitIDFunc in_tree(bag_count);
-				in_tree.fill(false);
-				max_id_heap<int>q(arc_count);
+	out << "s td "<< nodes_in_bag.size() << ' ' << maximum_bag_size << ' ' << node_count << '\n';
+	for(int i=0; i<bag_count; ++i){
+		out << "b "<<(i+1);
+		for(auto x:nodes_in_bag[i])
+			out << ' ' << (order(x)+1);
+		out << '\n';
 		
-				for(int b=0; b<bag_count; ++b){
-					if(!in_tree(b)){
-						if(b != 0)
-							output_backbone_edge(0, b);
-						in_tree.set(b, true);
-						for(int a:out_arc(b))
-							q.push(a, weight[a]);
-						while(!q.empty()){
-							int xy = q.pop();
-							
-							int x = tail[xy];
-							int y = head[xy];
+	}
 
-							assert(in_tree(x));
+	{
+		auto output_backbone_edge = [&](int b, int p){
+			out << (b+1) << ' ' << (p+1) << '\n';
+		};
 
-							if(!in_tree(y)){
-								output_backbone_edge(x, y);
-								in_tree.set(y, true);
-								for(int yz:out_arc(y)){
-									assert(!q.contains(yz));
-									q.push(yz, weight[yz]);
-								}
-							}
-						}
-						
-					}
+		std::vector<int>tail, head, weight;
+
+		for(int b=0; b<bag_count; ++b){
+			vector<int>neighbor_bags;
+			for(auto x:nodes_in_bag[b]){
+				vector<int>tmp;
+				std::set_union(
+					bags_of_node[x].begin(), bags_of_node[x].end(),
+					neighbor_bags.begin(), neighbor_bags.end(),
+					std::back_inserter(tmp)
+				);
+				neighbor_bags.swap(tmp);
+			}
+			for(auto p:neighbor_bags){
+				if(p != b){
+					tail.push_back(b);
+					head.push_back(p);
+					weight.push_back(compute_intersection_size(nodes_in_bag[b], nodes_in_bag[p]));
 				}
 			}
 		}
-	);
+
+		int arc_count = tail.size();
+
+		auto out_arc = invert_id_id_func(
+			id_id_func(
+				arc_count, bag_count, 
+				[&](unsigned a){return tail[a];}
+			)
+		);
+
+		BitIDFunc in_tree(bag_count);
+		in_tree.fill(false);
+		max_id_heap<int>q(arc_count);
+
+		for(int b=0; b<bag_count; ++b){
+			if(!in_tree(b)){
+				if(b != 0)
+					output_backbone_edge(0, b);
+				in_tree.set(b, true);
+				for(int a:out_arc(b))
+					q.push(a, weight[a]);
+				while(!q.empty()){
+					int xy = q.pop();
+					
+					int x = tail[xy];
+					int y = head[xy];
+
+					assert(in_tree(x));
+
+					if(!in_tree(y)){
+						output_backbone_edge(x, y);
+						in_tree.set(y, true);
+						for(int yz:out_arc(y)){
+							assert(!q.contains(yz));
+							q.push(yz, weight[yz]);
+						}
+					}
+				}
+				
+			}
+		}
+	}
 }
 
