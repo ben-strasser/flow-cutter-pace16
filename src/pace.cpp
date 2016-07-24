@@ -91,7 +91,7 @@ void signal_handler(int)
 	const char*x = best_decomposition;
 	if(x != 0)
 		ignore_return_value(write(STDOUT_FILENO, x, strlen(x)));
-	exit(0);
+	_Exit(EXIT_SUCCESS);
 }
 
 int main(int argc, char*argv[]){
