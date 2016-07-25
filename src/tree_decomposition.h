@@ -3,7 +3,8 @@
 
 #include "array_id_func.h"
 #include <string>
+#include <ostream>
 
-void print_tree_decompostion(const std::string&file_name, ArrayIDIDFunc tail, ArrayIDIDFunc head, const ArrayIDIDFunc&order);
+void print_tree_decompostion(std::ostream&out, ArrayIDIDFunc tail, ArrayIDIDFunc head, const ArrayIDIDFunc&order);
 
 #endif

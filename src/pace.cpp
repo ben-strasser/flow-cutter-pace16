@@ -14,18 +14,24 @@
 #include "separator.h"
 
 #include <limits>
-#include <iostream>
-#include <sys/time.h>
 #include <signal.h>
 #include <stdlib.h>
+#include <string.h>
+#include <string>
+#include <sstream>
 #ifdef PARALLELIZE
 #include <omp.h>
 #endif
+
+#include <sys/time.h>
+#include <unistd.h>
 using namespace std;
 
 ArrayIDIDFunc tail, head;
-ArrayIDIDFunc best_order;
+const char*volatile best_decomposition = 0;
 int best_bag_size = numeric_limits<int>::max();
+
+void ignore_return_value(int){}
 
 int compute_max_bag_size(const ArrayIDIDFunc&order){
 	auto inv_order = inverse_permutation(order);
@@ -53,6 +59,14 @@ unsigned long long get_milli_time(){
 	   + (unsigned long long)(tv.tv_usec) / 1000;
 }
 
+const char*compute_decomposition(const ArrayIDIDFunc&order){
+	ostringstream out;
+	print_tree_decompostion(out, tail, head, move(order));
+	char*buf = new char[out.str().length()+1];
+	memcpy(buf, out.str().c_str(), out.str().length()+1);
+	return buf;
+}
+
 void test_new_order(ArrayIDIDFunc order){
 	int x = compute_max_bag_size(order);
 	#ifdef PARALLELIZE
@@ -61,22 +75,23 @@ void test_new_order(ArrayIDIDFunc order){
 	{
 		if(x < best_bag_size){
 			best_bag_size = x;
-			best_order = order;
-			cout << "c status " << best_bag_size << " " << get_milli_time() << endl;
+			{
+				string msg = "c status "+to_string(best_bag_size)+" "+to_string(get_milli_time())+"\n";
+				ignore_return_value(write(STDOUT_FILENO, msg.data(), msg.length()));
+			}
+			const char*old_decomposition = best_decomposition;
+			best_decomposition = compute_decomposition(move(order));
+			delete[]old_decomposition;
 		}
 	}
 }
 
 void signal_handler(int)
 {
-	#ifdef PARALLELIZE
-	#pragma omp critical
-	#endif
-	{
-		if(tail.image_count() != 0 && best_order.image_count() != 0)
-			print_tree_decompostion("-", tail, head, best_order);
-	}
-	exit(0);
+	const char*x = best_decomposition;
+	if(x != 0)
+		ignore_return_value(write(STDOUT_FILENO, x, strlen(x)));
+	_Exit(EXIT_SUCCESS);
 }
 
 int main(int argc, char*argv[]){
