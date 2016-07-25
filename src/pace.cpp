@@ -75,22 +75,27 @@ void test_new_order(ArrayIDIDFunc order){
 	{
 		if(x < best_bag_size){
 			best_bag_size = x;
+			const char*old_decomposition = best_decomposition;
+			best_decomposition = compute_decomposition(move(order));
+			delete[]old_decomposition;
 			{
 				string msg = "c status "+to_string(best_bag_size)+" "+to_string(get_milli_time())+"\n";
 				ignore_return_value(write(STDOUT_FILENO, msg.data(), msg.length()));
 			}
-			const char*old_decomposition = best_decomposition;
-			best_decomposition = compute_decomposition(move(order));
-			delete[]old_decomposition;
 		}
 	}
 }
+
+char no_decomposition_message[] = "c info programm was aborted before any decomposition was computed\n";
 
 void signal_handler(int)
 {
 	const char*x = best_decomposition;
 	if(x != 0)
 		ignore_return_value(write(STDOUT_FILENO, x, strlen(x)));
+	else
+		ignore_return_value(write(STDOUT_FILENO, no_decomposition_message, sizeof(no_decomposition_message)));
+	
 	_Exit(EXIT_SUCCESS);
 }
 
