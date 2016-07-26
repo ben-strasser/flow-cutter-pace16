@@ -90,13 +90,18 @@ char no_decomposition_message[] = "c info programm was aborted before any decomp
 
 void signal_handler(int)
 {
-	const char*x = best_decomposition;
-	if(x != 0)
-		ignore_return_value(write(STDOUT_FILENO, x, strlen(x)));
-	else
-		ignore_return_value(write(STDOUT_FILENO, no_decomposition_message, sizeof(no_decomposition_message)));
+	#ifdef PARALLELIZE
+	#pragma omp single
+	#endif
+	{
+		const char*x = best_decomposition;
+		if(x != 0)
+			ignore_return_value(write(STDOUT_FILENO, x, strlen(x)));
+		else
+			ignore_return_value(write(STDOUT_FILENO, no_decomposition_message, sizeof(no_decomposition_message)));
 	
-	_Exit(EXIT_SUCCESS);
+		_Exit(EXIT_SUCCESS);
+	}
 }
 
 int main(int argc, char*argv[]){
