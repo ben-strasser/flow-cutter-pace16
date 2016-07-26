@@ -21,6 +21,7 @@
 #include <sstream>
 #ifdef PARALLELIZE
 #include <omp.h>
+#include <atomic>
 #endif
 
 #include <sys/time.h>
@@ -88,20 +89,23 @@ void test_new_order(ArrayIDIDFunc order){
 
 char no_decomposition_message[] = "c info programm was aborted before any decomposition was computed\n";
 
+#ifdef PARALLELIZE
+volatile atomic_flag only_one_thread_in_signal_handler = ATOMIC_FLAG_INIT;
+#endif
+
 void signal_handler(int)
 {
 	#ifdef PARALLELIZE
-	#pragma omp single
+	while (only_one_thread_in_signal_handler.test_and_set()) {}
 	#endif
-	{
-		const char*x = best_decomposition;
-		if(x != 0)
-			ignore_return_value(write(STDOUT_FILENO, x, strlen(x)));
-		else
-			ignore_return_value(write(STDOUT_FILENO, no_decomposition_message, sizeof(no_decomposition_message)));
-	
-		_Exit(EXIT_SUCCESS);
-	}
+
+	const char*x = best_decomposition;
+	if(x != 0)
+		ignore_return_value(write(STDOUT_FILENO, x, strlen(x)));
+	else
+		ignore_return_value(write(STDOUT_FILENO, no_decomposition_message, sizeof(no_decomposition_message)));
+
+	_Exit(EXIT_SUCCESS);
 }
 
 int main(int argc, char*argv[]){
