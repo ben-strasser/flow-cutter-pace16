@@ -105,13 +105,14 @@ public:
 			int t = tail(i);
 			out_arc_end.set(t, out_arc_end(t)+1);
 		}
-		out_arc_begin.set(0, 0);
-		for(int i=1; i<tail.image_count(); ++i){
-			out_arc_begin.set(i, out_arc_end(i-1));
-			out_arc_end.set(i, out_arc_end(i) + out_arc_begin(i));
+		if(tail.image_count() != 0){
+			out_arc_begin.set(0, 0);
+			for(int i=1; i<tail.image_count(); ++i){
+				out_arc_begin.set(i, out_arc_end(i-1));
+				out_arc_end.set(i, out_arc_end(i) + out_arc_begin(i));
+			}
+			assert(out_arc_end(tail.image_count()-1) == tail.preimage_count());
 		}
-		assert(out_arc_end(tail.image_count()-1) == tail.preimage_count());
-
 		for(int i=0; i<tail.preimage_count(); ++i){
 			int t = tail(i);
 			arc_head.set(out_arc_begin(t), head(i));

@@ -32,11 +32,15 @@ bool is_connected(const Tail&tail, const Head&head){
 	const int node_count = tail.image_count();
 	const int arc_count = tail.preimage_count();
 
-	UnionFind uf(node_count);
-	for(int i=0; i<arc_count; ++i)
-		uf.unite(tail(i), head(i));
+	if(node_count == 0){
+		return true;
+	} else {
+		UnionFind uf(node_count);
+		for(int i=0; i<arc_count; ++i)
+			uf.unite(tail(i), head(i));
 	
-	return  uf.component_size(uf(0)) == node_count;
+		return  uf.component_size(uf(0)) == node_count;
+	}
 }
 
 template<

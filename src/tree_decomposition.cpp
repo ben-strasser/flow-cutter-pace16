@@ -12,7 +12,6 @@ using namespace std;
 
 void print_tree_decompostion(std::ostream&out, ArrayIDIDFunc tail, ArrayIDIDFunc head, const ArrayIDIDFunc&order){
 	const int node_count = tail.image_count();
-	assert(node_count > 1);
 
 	auto inv_order = inverse_permutation(order);
 	tail = chain(tail, inv_order);
@@ -86,9 +85,11 @@ void print_tree_decompostion(std::ostream&out, ArrayIDIDFunc tail, ArrayIDIDFunc
 				upper_neighborhood_of_z.push_back(y);
 			}
 		);
-		upper_neighborhood_of_z.push_back(z);
-		sort(upper_neighborhood_of_z.begin(), upper_neighborhood_of_z.end());
-		on_new_potential_maximal_clique(z, move(upper_neighborhood_of_z));
+		if(z != -1){
+			upper_neighborhood_of_z.push_back(z);
+			sort(upper_neighborhood_of_z.begin(), upper_neighborhood_of_z.end());
+			on_new_potential_maximal_clique(z, move(upper_neighborhood_of_z));
+		}
 								
 		for(int x=0; x<node_count; ++x){
 			if(is_root(x)){

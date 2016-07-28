@@ -25,7 +25,10 @@ namespace cch_order{
 
 	inline
 	bool is_valid_partial_order(const ArrayIDIDFunc&partial_order){
-		return max_over_id_func(compute_histogram(partial_order)) <= 1;
+		if(partial_order.preimage_count() == 0)
+			return true;
+		else
+			return max_over_id_func(compute_histogram(partial_order)) <= 1;
 	}
 
 	// Computes an optimal order for a graph consisting of only a path
@@ -210,6 +213,7 @@ namespace cch_order{
 			auto sub_order = compute_trivial_graph_order_if_graph_is_trivial(sub_tail, sub_head, sub_input_node_id, compute_connected_graph_order);
 			
 			#ifndef NDEBUG
+			if(node_begin != node_end)
 			{
 				bool r = should_place_node_at_the_end_of_the_order(preorder(node_begin));
 				for(int x=node_begin; x<node_end; ++x){
@@ -218,18 +222,20 @@ namespace cch_order{
 			}
 			#endif
 
-			if(should_place_node_at_the_end_of_the_order(preorder(node_begin))){
-				order_end -= sub_node_count;
-				assert(order_begin <= order_end);
-				for(int i=0; i<sub_node_count; ++i){
-					order[order_end + i] = sub_order(i);
+			if(node_begin != node_end){
+				if(should_place_node_at_the_end_of_the_order(preorder(node_begin))){
+					order_end -= sub_node_count;
+					assert(order_begin <= order_end);
+					for(int i=0; i<sub_node_count; ++i){
+						order[order_end + i] = sub_order(i);
+					}
+				} else {
+					assert(order_begin + sub_node_count <= order_end);
+					for(int i=0; i<sub_node_count; ++i){
+						order[order_begin + i] = sub_order(i);
+					}
+					order_begin += sub_node_count;
 				}
-			} else {
-				assert(order_begin + sub_node_count <= order_end);
-				for(int i=0; i<sub_node_count; ++i){
-					order[order_begin + i] = sub_order(i);
-				}
-				order_begin += sub_node_count;
 			}
 		};
 
