@@ -123,7 +123,6 @@ int main(int argc, char*argv[]){
 			head = std::move(g.head);
 		}
 
-		test_new_order(identity_permutation(tail.image_count()));
 		test_new_order(compute_greedy_min_degree_order(tail, head));
 		test_new_order(compute_greedy_min_shortcut_order(tail, head));
 
