@@ -123,9 +123,6 @@ int main(int argc, char*argv[]){
 			head = std::move(g.head);
 		}
 
-		test_new_order(compute_greedy_min_degree_order(tail, head));
-		test_new_order(compute_greedy_min_shortcut_order(tail, head));
-
 		int random_seed = 0;
 
 		if(argc == 3){
@@ -139,6 +136,17 @@ int main(int argc, char*argv[]){
 		#endif
 		{
 			try{
+				#ifdef PARALLELIZE
+				#pragma omp sections nowait
+				#endif
+				{
+					test_new_order(compute_greedy_min_degree_order(tail, head));
+					#ifdef PARALLELIZE
+					#pragma omp section
+					#endif
+					test_new_order(compute_greedy_min_shortcut_order(tail, head));
+				}
+
 				std::minstd_rand rand_gen;
 				rand_gen.seed(
 					random_seed 
