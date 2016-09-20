@@ -68,8 +68,8 @@ namespace flow_cutter{
 		OutArc
 	>
 		make_graph(
-			const Tail&tail, const Head&head, 
-			const BackArc&back_arc, const OutArc&out_arc
+			Tail tail, Head head, 
+			BackArc back_arc, OutArc out_arc
 		){
 		return {
 			std::move(tail), std::move(head), std::move(back_arc), 
