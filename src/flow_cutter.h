@@ -73,7 +73,7 @@ namespace flow_cutter{
 		){
 		return {
 			std::move(tail), std::move(head), std::move(back_arc), 
-			ConstIntIDFunc<1>(tail.preimage_count()), ConstIntIDFunc<1>(tail.preimage_count()), 
+			ConstIntIDFunc<1>(tail.preimage_count()), 
 			std::move(out_arc)
 		};
 	}
